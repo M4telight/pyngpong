@@ -60,6 +60,16 @@ class Game(object):
     def start_game(self):
         pass
 
+    def construct_player(self, uid):
+        self.players[uid] = Paddle(
+            uid,
+            self.screen,
+            is_first_player=len(self.players) == 0
+        )
+        print('new ctlr with uid:', uid)
+        if len(self.players) == 2:
+            self.start_game()
+
     def handle_events(self):
         """
         Loop through all events.
@@ -67,14 +77,7 @@ class Game(object):
         for event in pymlgame.get_events():
             if event.type == pymlgame.E_NEWCTLR:
                 if len(self.players) < 2:
-                    self.players[event.uid] = Paddle(
-                        event.uid,
-                        self.screen,
-                        is_first_player=len(self.players) == 0
-                    )
-                    print('new ctlr with uid:', event.uid)
-                    if len(self.players) == 2:
-                        self.start_game()
+                    self.construct_player(event.uid)
 
             elif event.type == pymlgame.E_KEYDOWN:
                 if event.button == pymlgame.CTLR_UP:
