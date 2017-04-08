@@ -34,12 +34,16 @@ class Game(object):
         """
         Update the screens contents in every loop.
         """
-        if self.ball.position.x <= 0 or \
-           self.ball.position.x >= self.screen.width-1:
+        if any([p.check_collision(self.ball) for p in self.players.values()]):
             self.ball.reflect("x")
         if self.ball.position.y <= 0 or \
            self.ball.position.y >= self.screen.height-1:
             self.ball.reflect("y")
+
+        elif self.ball.position.x <= 0 or \
+           self.ball.position.x >= self.screen.width-1:
+           # gameover()
+            self.ball.reflect("x")
         self.ball.update()
 
     def render(self):
