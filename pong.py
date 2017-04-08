@@ -4,6 +4,7 @@
 import copy
 import pymlgame
 
+from ball import Ball
 from misc import Point
 from paddle import Paddle
 
@@ -19,11 +20,19 @@ class Game(object):
         self.screen = pymlgame.Screen(mlhost, mlport, screen_width, screen_height)
         self.clock = pymlgame.Clock(15)
         self.gameover = False
-
         self.players = {}
         self.init_ball()
+        self.init_paddles()
+
+    def init_paddles(self):
+        surface = pymlgame.Surface(1, 3)
+        surface.draw_line((0, 0), (0, 2), pymlgame.RED)
+        self.paddle_surfaces = [surface, copy.copy(surface)]
 
     def init_ball(self):
+        ball_position = Point(11, 5)
+        ball_velocity = Point(0.8, 0.3)
+        self.ball = Ball(ball_position, ball_velocity)
         self.ball_surface = pymlgame.Surface(1, 1)
         self.ball_surface.draw_dot((0, 0), pymlgame.GREEN)
 
@@ -31,7 +40,13 @@ class Game(object):
         """
         Update the screens contents in every loop.
         """
-        pass
+        if self.ball.position.x <= 0 or \
+           self.ball.position.x >= self.screen.width-1:
+            self.ball.reflect("x")
+        if self.ball.position.y <= 0 or \
+           self.ball.position.y >= self.screen.height-1:
+            self.ball.reflect("y")
+        self.ball.update()
 
     def render(self):
         """
@@ -39,9 +54,11 @@ class Game(object):
         """
         self.screen.reset()
 
-        self.screen.blit(self.ball_surface, (10, 10))
         for paddle in self.players.values():
             self.screen.blit(paddle.surface, paddle.position)
+
+        self.screen.blit(self.ball_surface,
+                         tuple(map(round, self.ball.position)))
 
         self.screen.update()
         self.clock.tick()
