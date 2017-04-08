@@ -22,12 +22,6 @@ class Game(object):
         self.gameover = False
         self.players = {}
         self.init_ball()
-        self.init_paddles()
-
-    def init_paddles(self):
-        surface = pymlgame.Surface(1, 3)
-        surface.draw_line((0, 0), (0, 2), pymlgame.RED)
-        self.paddle_surfaces = [surface, copy.copy(surface)]
 
     def init_ball(self):
         ball_position = Point(11, 5)
