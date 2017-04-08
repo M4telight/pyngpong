@@ -109,6 +109,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--port', type=int, default=1337, help='remote port')
     parser.add_argument('--width', type=int, default=15, help='width of matelight')
     parser.add_argument('--height', type=int, default=16, help='height of matelight')
+    parser.add_argument('--demo', action='store_true', default=False, help='start game in demo mode')
 
     args = parser.parse_args()
     GAME = Game(
@@ -117,4 +118,9 @@ if __name__ == '__main__':
         args.width,
         args.height,
     )
+
+    if args.demo:
+        GAME.construct_player(1)
+        GAME.construct_player(2)
+
     GAME.gameloop()
