@@ -12,11 +12,14 @@ class Paddle:
         self.paddle_height = 3
         self.surface = pymlgame.Surface(1, self.paddle_height)
         self.surface.draw_line((0, 0), (0, 2), pymlgame.RED)
-
+        self.is_first_player = is_first_player
         self.screen = screen
 
+        self.reset()
+
+    def reset(self):
         middle = self.screen.height // 2 - 1
-        self.position = Point(x=0, y=middle) if is_first_player else Point(self.screen.width - 1, middle)
+        self.position = Point(x=0, y=middle) if self.is_first_player else Point(self.screen.width - 1, middle)
 
     def move_up(self):
         self.position -= self.ALLOWED_MOVEMENT

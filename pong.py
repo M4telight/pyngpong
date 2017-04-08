@@ -28,7 +28,7 @@ class Game(object):
 
     def init_ball(self):
         ball_position = Point(self.screen.width // 2, self.screen.height // 2)
-        ball_velocity = Point(random.choice([-1, 1]) * 0.8, random.choice([-1, 1]) * 0.3)
+        ball_velocity = Point(random.choice([-1, 1]) * 0.5, random.choice([-1, 1]) * 0.2)
         self.ball = Ball(ball_position, ball_velocity)
         self.ball_surface = pymlgame.Surface(1, 1)
         self.ball_surface.draw_dot((0, 0), pymlgame.GREEN)
@@ -49,7 +49,7 @@ class Game(object):
             print("That's simply poor programming...")
 
     def update_start_game(self):
-        time.sleep(1)
+        time.sleep(2)
         self.state = "RUNNING"
 
     def update_running(self):
@@ -66,6 +66,8 @@ class Game(object):
 
     def update_game_over(self):
         self.init_ball()
+        for p in self.players.values():
+            p.reset()
         self.state = "START_GAME"
 
     def render(self):
@@ -84,6 +86,7 @@ class Game(object):
         self.clock.tick()
 
     def start_game(self):
+        self.state = "START_GAME"
         print("starting game")
 
     def construct_player(self, uid):
