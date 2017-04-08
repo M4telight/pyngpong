@@ -3,6 +3,8 @@
 
 import copy
 import pymlgame
+import random
+import time
 
 from ball import Ball
 from misc import Point
@@ -21,11 +23,12 @@ class Game(object):
         self.clock = pymlgame.Clock(15)
         self.gameover = False
         self.players = {}
+        self.state = "WAITING"
         self.init_ball()
 
     def init_ball(self):
-        ball_position = Point(11, 5)
-        ball_velocity = Point(0.8, 0.3)
+        ball_position = Point(self.screen.width // 2, self.screen.height // 2)
+        ball_velocity = Point(random.choice([-1, 1]) * 0.8, random.choice([-1, 1]) * 0.3)
         self.ball = Ball(ball_position, ball_velocity)
         self.ball_surface = pymlgame.Surface(1, 1)
         self.ball_surface.draw_dot((0, 0), pymlgame.GREEN)
@@ -34,6 +37,22 @@ class Game(object):
         """
         Update the screens contents in every loop.
         """
+        if self.state == "WAITING":
+            pass
+        elif self.state == "START_GAME":
+            self.update_start_game()
+        elif self.state == "RUNNING":
+            self.update_running()
+        elif self.state == "GAME_OVER":
+            self.update_game_over()
+        else:
+            print("That's simply poor programming...")
+
+    def update_start_game(self):
+        time.sleep(1)
+        self.state = "RUNNING"
+
+    def update_running(self):
         if any([p.check_collision(self.ball) for p in self.players.values()]):
             self.ball.reflect("x")
         if self.ball.position.y <= 0 or \
@@ -42,9 +61,12 @@ class Game(object):
 
         elif self.ball.position.x <= 0 or \
            self.ball.position.x >= self.screen.width-1:
-           # gameover()
-            self.ball.reflect("x")
+            self.state = "GAME_OVER"
         self.ball.update()
+
+    def update_game_over(self):
+        self.init_ball()
+        self.state = "START_GAME"
 
     def render(self):
         """
@@ -62,7 +84,7 @@ class Game(object):
         self.clock.tick()
 
     def start_game(self):
-        pass
+        print("starting game")
 
     def construct_player(self, uid):
         self.players[uid] = Paddle(
@@ -126,5 +148,6 @@ if __name__ == '__main__':
     if args.demo:
         GAME.construct_player(1)
         GAME.construct_player(2)
+        GAME.state = "START_GAME"
 
     GAME.gameloop()

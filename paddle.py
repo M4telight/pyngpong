@@ -31,4 +31,6 @@ class Paddle:
             self.position = Point(x=self.position.x, y=self.screen.height - self.paddle_height)
 
     def check_collision(self, ball):
-        return self.position.x == ball.position.x and self.position.y <= ball.position.y < self.position.y + self.paddle_height
+        x_coll = abs(self.position.x - ball.position.x) <= 1
+        y_coll = self.position.y <= ball.position.y < self.position.y + self.paddle_height
+        return x_coll and y_coll
