@@ -20,13 +20,8 @@ class Game(object):
         self.clock = pymlgame.Clock(15)
         self.gameover = False
 
-        self.init_paddles()
+        self.players = {}
         self.init_ball()
-
-    def init_paddles(self):
-        self.paddles = []
-        self.paddles.append(Paddle(1, self.screen))
-        self.paddles.append(Paddle(2, self.screen, is_first_player=False))
 
     def init_ball(self):
         self.ball_surface = pymlgame.Surface(1, 1)
@@ -45,17 +40,39 @@ class Game(object):
         self.screen.reset()
 
         self.screen.blit(self.ball_surface, (10, 10))
-        for paddle in self.paddles:
+        for paddle in self.players.values():
             self.screen.blit(paddle.surface, paddle.position)
 
         self.screen.update()
         self.clock.tick()
 
+    def start_game(self):
+        pass
+
     def handle_events(self):
         """
         Loop through all events.
         """
-        pass
+        for event in pymlgame.get_events():
+            if event.type == pymlgame.E_NEWCTLR:
+                if len(self.players) < 2:
+                    self.players[event.uid] = Paddle(
+                        event.uid,
+                        self.screen,
+                        is_first_player=len(self.players) == 0
+                    )
+                    print('new ctlr with uid:', event.uid)
+                    if len(self.players) == 2:
+                        self.start_game()
+
+            elif event.type == pymlgame.E_KEYDOWN:
+                if event.button == pymlgame.CTLR_UP:
+                    self.players[event.uid].move_up()
+                elif event.button == pymlgame.CTLR_DOWN:
+                    self.players[event.uid].move_down()
+
+            elif event.type == pymlgame.E_PING:
+                print('ping from', event.uid)
 
     def gameloop(self):
         """
