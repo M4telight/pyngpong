@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import copy
 import pymlgame
 
 class Game(object):
@@ -14,9 +15,19 @@ class Game(object):
         pymlgame.init()
         self.screen = pymlgame.Screen(mlhost, mlport, screen_width, screen_height)
         self.clock = pymlgame.Clock(15)
-
-        part = (int(self.screen.width / 2), int(self.screen.height / 2))
         self.gameover = False
+
+        self.init_paddles()
+        self.init_ball()
+
+    def init_paddles(self):
+        surface = pymlgame.Surface(1, 3)
+        surface.draw_line((0, 0), (0, 2), pymlgame.RED)
+        self.paddle_surfaces = [surface, copy.copy(surface)]
+
+    def init_ball(self):
+        self.ball_surface = pymlgame.Surface(1, 1)
+        self.ball_surface.draw_dot((0, 0), pymlgame.GREEN)
 
     def update(self):
         """
@@ -30,9 +41,11 @@ class Game(object):
         """
         self.screen.reset()
 
-        self.screen.update()
+        self.screen.blit(self.ball_surface, (10, 10))
+        self.screen.blit(self.paddle_surfaces[0], (0, 0))
+        self.screen.blit(self.paddle_surfaces[1], (14, 0))
 
-        #TODO: accelerate every 5 points by 1 fps
+        self.screen.update()
         self.clock.tick()
 
     def handle_events(self):
