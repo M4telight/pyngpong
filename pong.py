@@ -4,6 +4,8 @@
 import copy
 import pymlgame
 
+from misc import Paddle, Point
+
 class Game(object):
     """
     The main game class that holds the gameloop.
@@ -21,9 +23,9 @@ class Game(object):
         self.init_ball()
 
     def init_paddles(self):
-        surface = pymlgame.Surface(1, 3)
-        surface.draw_line((0, 0), (0, 2), pymlgame.RED)
-        self.paddle_surfaces = [surface, copy.copy(surface)]
+        self.paddles = []
+        self.paddles.append(Paddle(1, self.screen))
+        self.paddles.append(Paddle(2, self.screen, is_first_player=False))
 
     def init_ball(self):
         self.ball_surface = pymlgame.Surface(1, 1)
@@ -42,8 +44,8 @@ class Game(object):
         self.screen.reset()
 
         self.screen.blit(self.ball_surface, (10, 10))
-        self.screen.blit(self.paddle_surfaces[0], (0, 0))
-        self.screen.blit(self.paddle_surfaces[1], (14, 0))
+        for paddle in self.paddles:
+            self.screen.blit(paddle.surface, paddle.position)
 
         self.screen.update()
         self.clock.tick()
