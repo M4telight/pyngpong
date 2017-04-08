@@ -4,7 +4,8 @@
 import copy
 import pymlgame
 
-from misc import Paddle, Point
+from misc import Point
+from paddle import Paddle
 
 class Game(object):
     """
@@ -67,7 +68,7 @@ class Game(object):
                 self.render()
         except KeyboardInterrupt:
             pass
- 
+
 
 if __name__ == '__main__':
     import argparse
