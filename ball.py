@@ -1,9 +1,12 @@
+import pymlgame
 from misc import Point
 
 class Ball(object):
     def __init__(self, position, velocity):
         self.position = position
         self.velocity = velocity
+        self.surface = pymlgame.Surface(1, 1)
+        self.surface.draw_dot((0, 0), pymlgame.GREEN)
 
     def update(self):
         """

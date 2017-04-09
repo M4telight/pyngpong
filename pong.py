@@ -30,8 +30,6 @@ class Game(object):
         ball_position = Point(self.screen.width // 2, self.screen.height // 2)
         ball_velocity = Point(random.choice([-1, 1]) * 0.5, random.choice([-1, 1]) * 0.2)
         self.ball = Ball(ball_position, ball_velocity)
-        self.ball_surface = pymlgame.Surface(1, 1)
-        self.ball_surface.draw_dot((0, 0), pymlgame.GREEN)
 
     def update(self):
         """
@@ -79,7 +77,7 @@ class Game(object):
         for paddle in self.players.values():
             self.screen.blit(paddle.surface, paddle.position)
 
-        self.screen.blit(self.ball_surface,
+        self.screen.blit(self.ball.surface,
                          tuple(map(round, self.ball.position)))
 
         self.screen.update()
