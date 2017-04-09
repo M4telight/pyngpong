@@ -108,7 +108,7 @@ class Game(object):
                 if len(self.players) < 2:
                     self.construct_player(event.uid)
 
-            elif event.type == pymlgame.E_KEYDOWN:
+            elif event.type == pymlgame.E_KEYDOWN or event.type == pymlgame.E_KEYPRESSED:
                 if event.button == pymlgame.CTLR_UP:
                     self.players[event.uid].move_up()
                 elif event.button == pymlgame.CTLR_DOWN:
