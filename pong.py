@@ -57,12 +57,8 @@ class Game(object):
             self.state = "START_GAME"
 
     def render_waiting(self):
-        p0_color = pymlgame.GREY5
-        p1_color = pymlgame.GREY5
-        if len(self.players) > 0:
-            p0_color = pymlgame.GREEN
-        if len(self.players) > 1:
-            p1_color = pymlgame.GREEN
+        p0_color = pymlgame.GREEN if len(self.players) > 0 else pymlgame.GREY5
+        p1_color = pymlgame.GREEN if len(self.players) > 1 else pymlgame.GREY5
 
         surface = pymlgame.Surface(self.screen.width, self.screen.height)
         # note(hrantzsch): this works for our default screen size only
@@ -77,16 +73,18 @@ class Game(object):
         self.state = "RUNNING"
 
     def update_running(self):
+        if self.ball.position.x <= 0 or \
+           self.ball.position.x >= self.screen.width-1:
+            self.state = "GAME_OVER"
+            return
+
         if any([p.check_collision(self.ball) for p in self.players.values()]):
             self.ball.reflect("x")
+        # note: we can collide with the paddle AND collide with the ceiling
         if self.ball.position.y <= 0 or \
            self.ball.position.y >= self.screen.height-1:
             self.ball.reflect("y")
 
-        elif self.ball.position.x <= 0 or \
-           self.ball.position.x >= self.screen.width-1:
-            self.state = "GAME_OVER"
-            # todo(hrantzsch): we don't want to update the ball here -- refactor
         self.ball.update()
 
     def render_running(self):
