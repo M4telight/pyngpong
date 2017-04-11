@@ -24,6 +24,9 @@ class GameState():
 
 
 class WaitingState(GameState):
+    """
+    In this state, the game waits for 2 players to join.
+    """
 
     def update(self):
         if len(self.game.players) == 2:
@@ -46,14 +49,27 @@ class WaitingState(GameState):
 
 
 class StartingState(GameState):
+    """
+    In this state, the game renders only the players' paddles for a given
+    amount of time.
+    """
+
+    def __init__(self, game):
+        super(self.__class__, self).__init__(game)
+        self.init_time = time.time()
+        self.delay = 5  # seconds between inner state changes
+
+    def should_proceed(self):
+        return time.time() - self.init_time > self.delay
 
     def update(self):
-        time.sleep(2)
-        self.game.state = RunningState(self.game)
+        if self.should_proceed():
+            self.game.state = RunningState(self.game)
 
     def render(self):
-        # maybe a fancy countdown?
-        pass
+        # maybe a fancy countdown animation at each tick?
+        for paddle in self.game.players.values():
+            self.game.screen.blit(paddle.surface, paddle.position)
 
 
 class RunningState(GameState):
