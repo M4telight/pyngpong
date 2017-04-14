@@ -17,10 +17,10 @@ class GameState():
         self.game = game
 
     def update(self):
-        pass
+        raise NotImplementedError
 
     def render(self):
-        pass
+        raise NotImplementedError
 
 
 class WaitingState(GameState):
