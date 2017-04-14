@@ -57,13 +57,13 @@ class StartingState(GameState):
     def __init__(self, game):
         super(self.__class__, self).__init__(game)
         self.init_time = time.time()
-        self.delay = 5  # seconds between inner state changes
+        self.delay = 3  # seconds between inner state changes
 
-    def should_proceed(self):
+    def _should_proceed(self):
         return time.time() - self.init_time > self.delay
 
     def update(self):
-        if self.should_proceed():
+        if self._should_proceed():
             self.game.state = RunningState(self.game)
 
     def render(self):

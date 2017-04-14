@@ -51,8 +51,7 @@ class Game(object):
                 if len(self.players) < 2:
                     self.construct_player(event.uid)
 
-            elif event.type == pymlgame.E_KEYDOWN or \
-                    event.type == pymlgame.E_KEYPRESSED:
+            elif event.type in [pymlgame.E_KEYDOWN, pymlgame.E_KEYPRESSED]:
                 if event.button == pymlgame.CTLR_UP:
                     self.players[event.uid].move_up()
                 elif event.button == pymlgame.CTLR_DOWN:
@@ -81,7 +80,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Play Snake on your Matelight")
+        description="Play Pong on your Matelight")
     parser.add_argument('host', help='remote host to connect to')
     parser.add_argument('-p', '--port', type=int,
                         default=1337, help='remote port')
