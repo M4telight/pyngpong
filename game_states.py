@@ -1,11 +1,45 @@
+import pygame
 import pymlgame
 import time
 
-import drawing
 from misc import Point
 
 
-class GameState():
+class PygameSurfaceDecorator:
+    """
+    A wrapper class around pygame surfaces that monkey patches differences
+    between pymlgame and pygame
+    """
+
+    def __getattribute__(self, item):
+        """
+        method that tries to first return method of decorator.
+        If that method is not present this methods tries to return
+        the property from the decorated object.
+        """
+        try:
+            v = object.__getattribute__(self, item)
+        except AttributeError:
+            v = getattr(object.__getattribute__(self, 'surface'), item)
+        return v
+
+    def __init__(self, surface):
+        self.surface = surface
+
+    @property
+    def width(self):
+        return self.surface.get_width()
+
+    @property
+    def height(self):
+        return self.surface.get_height()
+
+    @property
+    def matrix(self):
+        return pygame.surfarray.array3d(self.surface)
+
+
+class GameState:
     """
     Abstract base class for a state of a pyngpong game. Derived classes should
     implement update() and render().
@@ -15,6 +49,12 @@ class GameState():
 
     def __init__(self, game):
         self.game = game
+
+    def _init_font_rendering(self):
+        if not pygame.font.get_init():
+            pygame.font.init()
+
+        self.font = pygame.font.Font('assets/fonts/6px2bus.ttf', 6)
 
     def update(self):
         raise NotImplementedError
@@ -27,6 +67,10 @@ class WaitingState(GameState):
     """
     In this state, the game waits for 2 players to join.
     """
+
+    def __init__(self, *args,  **kwargs):
+        super(WaitingState, self).__init__(*args, **kwargs)
+        self._init_font_rendering()
 
     def update(self):
         if len(self.game.players) == 2:
@@ -41,10 +85,16 @@ class WaitingState(GameState):
         surface = pymlgame.Surface(
             self.game.screen.width, self.game.screen.height)
         # note(hrantzsch): this works for our default screen size only
-        drawing.draw_p(surface, Point(0, 2), p0_color)
-        drawing.draw_0(surface, Point(4, 2), p0_color)
-        drawing.draw_p(surface, Point(10, 2), p1_color)
-        drawing.draw_1(surface, Point(14, 2), p1_color)
+        player0 = PygameSurfaceDecorator(
+            self.font.render("P0", False, p0_color, pymlgame.BLACK)
+        )
+        surface.blit(player0, Point(0, 2))
+
+        player1 = PygameSurfaceDecorator(
+            self.font.render("P1", False, p1_color, pymlgame.BLACK)
+        )
+        surface.blit(player1, Point(8, 2))
+
         self.game.screen.blit(surface)
 
 
@@ -59,8 +109,18 @@ class StartingState(GameState):
         self.init_time = time.time()
         self.delay = 3  # seconds between inner state changes
 
+        self.screen_center = Point(
+            self.game.screen.width // 2,
+            self.game.screen.height // 2,
+        )
+
+        self._init_font_rendering()
+
+    def _time_elapsed(self):
+        return int(time.time() - self.init_time)
+
     def _should_proceed(self):
-        return time.time() - self.init_time > self.delay
+        return self._time_elapsed() > self.delay
 
     def update(self):
         if self._should_proceed():
@@ -70,6 +130,21 @@ class StartingState(GameState):
         # maybe a fancy countdown animation at each tick?
         for paddle in self.game.players.values():
             self.game.screen.blit(paddle.surface, paddle.position)
+
+        # get time we still have to wait and render it to center of screen
+        text = str(self.delay - self._time_elapsed())
+        time_left_surface = PygameSurfaceDecorator(
+            self.font.render(text, False, pymlgame.DARKYELLOW, pymlgame.BLACK)
+        )
+
+        time_left_center = Point(
+            time_left_surface.width // 2,
+            time_left_surface.height // 2
+        )
+        self.game.screen.blit(
+            time_left_surface,
+            self.screen_center - time_left_center
+        )
 
 
 class RunningState(GameState):
