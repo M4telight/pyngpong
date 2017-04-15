@@ -2,41 +2,7 @@ import pygame
 import pymlgame
 import time
 
-from misc import Point
-
-
-class PygameSurfaceDecorator:
-    """
-    A wrapper class around pygame surfaces that monkey patches differences
-    between pymlgame and pygame
-    """
-
-    def __getattribute__(self, item):
-        """
-        method that tries to first return method of decorator.
-        If that method is not present this methods tries to return
-        the property from the decorated object.
-        """
-        try:
-            v = object.__getattribute__(self, item)
-        except AttributeError:
-            v = getattr(object.__getattribute__(self, 'surface'), item)
-        return v
-
-    def __init__(self, surface):
-        self.surface = surface
-
-    @property
-    def width(self):
-        return self.surface.get_width()
-
-    @property
-    def height(self):
-        return self.surface.get_height()
-
-    @property
-    def matrix(self):
-        return pygame.surfarray.array3d(self.surface)
+from misc import Point, PygameSurfaceDecorator
 
 
 class GameState:
@@ -69,7 +35,7 @@ class WaitingState(GameState):
     """
 
     def __init__(self, *args,  **kwargs):
-        super(WaitingState, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._init_font_rendering()
 
     def update(self):
@@ -105,7 +71,7 @@ class StartingState(GameState):
     """
 
     def __init__(self, game):
-        super(self.__class__, self).__init__(game)
+        super().__init__(game)
         self.init_time = time.time()
         self.delay = 3  # seconds between inner state changes
 

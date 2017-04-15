@@ -1,2 +1,6 @@
 pygame >= 1.9.2
+
+# the pygame.surfarray module needs numpy, if numpy is not present it won't
+# work and also not give any hint that numpy is missing that's why we add it
+# here
 numpy >= 1.12.1
