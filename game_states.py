@@ -83,6 +83,8 @@ class PauseState(GameState):
         return self._time_elapsed() > self.delay
 
     def update(self):
+        self.game.init_ball()
+
         if self._should_proceed():
             self.game.state = self.next_state
 
@@ -100,7 +102,7 @@ class StartingState(PauseState):
 
     def __init__(self, game):
         super().__init__(game)
-        self.delay = 3  # seconds between inner state changes
+        self.delay = 5  # seconds between inner state changes
 
         self.next_state = RunningState(self.game)
 
@@ -136,9 +138,33 @@ class ScoredState(PauseState):
 
     def __init__(self, game):
         super().__init__(game)
-        self.delay = 1  # seconds between inner state changes
+
+        self.delay = 3  # seconds between inner state changes
 
         self.next_state = RunningState(self.game)
+        self.screen_center = Point(
+            self.game.screen.width // 2,
+            self.game.screen.height // 2,
+        )
+
+    def render(self):
+        super().render()
+
+        # get time we still have to wait and render it to center of screen
+        text = ':'.join(map(lambda i : str(i), self.game.scores.values()))
+        time_left_surface = PygameSurfaceDecorator(
+            self.font.render(text, False, pymlgame.DARKYELLOW, pymlgame.BLACK)
+        )
+
+        time_left_center = Point(
+            time_left_surface.width // 2,
+            time_left_surface.height // 2
+        )
+        self.game.screen.blit(
+            time_left_surface,
+            self.screen_center - time_left_center
+        )
+
 
 
 class RunningState(GameState):
@@ -146,17 +172,19 @@ class RunningState(GameState):
     def __init__(self, game):
         super().__init__(game)
 
-    def update(self):
+    def _check_if_scored(self):
         if self.game.ball.position.x <= 0:
-            uid = [p for p in self.game.players.values() if p.is_first_player][0].player_id
-            self.game.scores[uid] += 1
-        elif self.game.ball.position.x >= self.game.screen.width - 1:
             uid = [p for p in self.game.players.values() if not p.is_first_player][0].player_id
             self.game.scores[uid] += 1
+        elif self.game.ball.position.x >= self.game.screen.width - 1:
+            uid = [p for p in self.game.players.values() if p.is_first_player][0].player_id
+            self.game.scores[uid] += 1
+
+    def update(self):
+        self._check_if_scored()
 
         if self.game.ball.position.x <= 0 or \
          self.game.ball.position.x >= self.game.screen.width - 1:
-            print(self.game.scores)
             if any([s > 2 for s in self.game.scores.values()]):
                 self.game.state = GameOverState(self.game)
                 return
