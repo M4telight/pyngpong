@@ -25,6 +25,7 @@ class Game(object):
         self.clock = pymlgame.Clock(15)
         self.gameover = False
         self.players = {}
+        self.scores = {}
         self.state = WaitingState(self)
         self.init_ball()
 
@@ -40,6 +41,7 @@ class Game(object):
             self.screen,
             is_first_player=len(self.players) == 0
         )
+        self.scores[uid] = 0
         print('new ctlr with uid:', uid)
 
     def handle_events(self):
