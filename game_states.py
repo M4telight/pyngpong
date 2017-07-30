@@ -1,6 +1,7 @@
 import pygame
 import pymlgame
 import time
+import math
 
 from misc import Point, PygameSurfaceDecorator
 
@@ -76,6 +77,11 @@ class PauseState(GameState):
 
         self._init_font_rendering()
 
+        self.screen_center = Point(
+            math.ceil(self.game.screen.width / 2),
+            self.game.screen.height // 2,
+        )
+
     def _time_elapsed(self):
         return int(time.time() - self.init_time)
 
@@ -97,7 +103,7 @@ class PauseState(GameState):
 class StartingState(PauseState):
     """
     In this state, the game renders only the players' paddles for a given
-    amount of time.
+    amount of time as well as a countdown.
     """
 
     def __init__(self, game):
@@ -105,11 +111,6 @@ class StartingState(PauseState):
         self.delay = 5  # seconds between inner state changes
 
         self.next_state = RunningState(self.game)
-
-        self.screen_center = Point(
-            self.game.screen.width // 2,
-            self.game.screen.height // 2,
-        )
 
     def render(self):
         super().render()
@@ -133,7 +134,7 @@ class StartingState(PauseState):
 class ScoredState(PauseState):
     """
     In this state, the game renders only the players' paddles for a given
-    amount of time.
+    amount of time as well as the score.
     """
 
     def __init__(self, game):
@@ -142,15 +143,11 @@ class ScoredState(PauseState):
         self.delay = 3  # seconds between inner state changes
 
         self.next_state = RunningState(self.game)
-        self.screen_center = Point(
-            self.game.screen.width // 2,
-            self.game.screen.height // 2,
-        )
 
     def render(self):
         super().render()
 
-        # get time we still have to wait and render it to center of screen
+        # get score and render it to center of screen
         text = ':'.join(map(lambda i : str(i), self.game.scores.values()))
         time_left_surface = PygameSurfaceDecorator(
             self.font.render(text, False, pymlgame.DARKYELLOW, pymlgame.BLACK)
