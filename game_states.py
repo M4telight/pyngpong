@@ -64,7 +64,7 @@ class WaitingState(GameState):
         self.game.screen.blit(surface)
 
 
-class StartingState(GameState):
+class PauseState(GameState):
     """
     In this state, the game renders only the players' paddles for a given
     amount of time.
@@ -73,12 +73,6 @@ class StartingState(GameState):
     def __init__(self, game):
         super().__init__(game)
         self.init_time = time.time()
-        self.delay = 3  # seconds between inner state changes
-
-        self.screen_center = Point(
-            self.game.screen.width // 2,
-            self.game.screen.height // 2,
-        )
 
         self._init_font_rendering()
 
@@ -90,12 +84,33 @@ class StartingState(GameState):
 
     def update(self):
         if self._should_proceed():
-            self.game.state = RunningState(self.game)
+            self.game.state = self.next_state
 
     def render(self):
         # maybe a fancy countdown animation at each tick?
         for paddle in self.game.players.values():
             self.game.screen.blit(paddle.surface, paddle.position)
+
+
+class StartingState(PauseState):
+    """
+    In this state, the game renders only the players' paddles for a given
+    amount of time.
+    """
+
+    def __init__(self, game):
+        super().__init__(game)
+        self.delay = 3  # seconds between inner state changes
+
+        self.next_state = RunningState(self.game)
+
+        self.screen_center = Point(
+            self.game.screen.width // 2,
+            self.game.screen.height // 2,
+        )
+
+    def render(self):
+        super().render()
 
         # get time we still have to wait and render it to center of screen
         text = str(self.delay - self._time_elapsed())
@@ -113,13 +128,42 @@ class StartingState(GameState):
         )
 
 
+class ScoredState(PauseState):
+    """
+    In this state, the game renders only the players' paddles for a given
+    amount of time.
+    """
+
+    def __init__(self, game):
+        super().__init__(game)
+        self.delay = 1  # seconds between inner state changes
+
+        self.next_state = RunningState(self.game)
+
+
 class RunningState(GameState):
 
+    def __init__(self, game):
+        super().__init__(game)
+
     def update(self):
+        if self.game.ball.position.x <= 0:
+            uid = [p for p in self.game.players.values() if p.is_first_player][0].player_id
+            self.game.scores[uid] += 1
+        elif self.game.ball.position.x >= self.game.screen.width - 1:
+            uid = [p for p in self.game.players.values() if not p.is_first_player][0].player_id
+            self.game.scores[uid] += 1
+
         if self.game.ball.position.x <= 0 or \
-           self.game.ball.position.x >= self.game.screen.width-1:
-            self.game.state = GameOverState(self.game)
-            return
+         self.game.ball.position.x >= self.game.screen.width - 1:
+            print(self.game.scores)
+            if any([s > 2 for s in self.game.scores.values()]):
+                self.game.state = GameOverState(self.game)
+                return
+            else:
+                self.game.state = ScoredState(self.game)
+                return
+            
 
         if any([p.check_collision(self.game.ball)
                 for p in self.game.players.values()]):
@@ -148,6 +192,8 @@ class GameOverState(GameState):
         self.game.init_ball()
         for p in self.game.players.values():
             p.reset()
+        for p in self.game.scores.keys():
+            self.game.scores[p] = 0
         self.game.state = StartingState(self.game)
 
     def render(self):
