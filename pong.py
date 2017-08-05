@@ -44,6 +44,15 @@ class Game(object):
         self.scores[uid] = 0
         print('new ctlr with uid:', uid)
 
+    def delete_player(self, uid):
+        self.players.pop(uid, None)
+        self.scores.pop(uid, None)
+        print('ctlr left with uid:', uid)
+
+        if len(self.players) < 2:
+            self.state = WaitingState(self)
+            self.init_ball()
+
     def handle_events(self):
         """
         Loop through all events.
@@ -52,7 +61,8 @@ class Game(object):
             if event.type == pymlgame.E_NEWCTLR:
                 if len(self.players) < 2:
                     self.construct_player(event.uid)
-
+            elif event.type == pymlgame.E_DISCONNECT:
+                self.delete_player(event.uid)
             elif event.type in [pymlgame.E_KEYDOWN, pymlgame.E_KEYPRESSED]:
                 if event.button == pymlgame.CTLR_UP:
                     self.players[event.uid].move_up()
