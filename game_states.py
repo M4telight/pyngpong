@@ -148,7 +148,7 @@ class ScoredState(PauseState):
         super().render()
 
         # get score and render it to center of screen
-        text = ':'.join(map(lambda i : str(i), self.game.scores.values()))
+        text = ':'.join(map(str, self.game.scores.values()))
         time_left_surface = PygameSurfaceDecorator(
             self.font.render(text, False, pymlgame.DARKYELLOW, pymlgame.BLACK)
         )
